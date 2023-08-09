@@ -5,7 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
