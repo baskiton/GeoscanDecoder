@@ -1,0 +1,54 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: Python application
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        pip install -r requirements.txt
+
+    - name: Build
+      run: |
+        pyinstaller -y decoder.spec
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: GeoscanDecoder_${{ matrix.os }}
+        path: dist/*
+
+  nightly_release:
+    runs-on: ubuntu-latest
+    needs: ["build"]
+
+    steps:
+      - uses: actions/download-artifact@v3
+        run: |
+          mkdir out &&
+          cp GeoscanDecoder_*-latest/* out/
+
+      - name: Update release
+        run: gh release upload nightly out/* -R ${{github.repository}} --clobber
