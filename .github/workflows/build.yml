@@ -7,6 +7,9 @@ on:
   push:
     branches: [ "main" ]
 
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 permissions:
   contents: read
 
@@ -53,4 +56,4 @@ jobs:
           cp GeoscanDecoder_*-latest/* out/
 
       - name: Update release
-        run: gh release upload nightly out/* -R ${{github.repository}} --clobber
+        run: gh release upload nightly out/* -R ${{ github.repository }} --clobber
