@@ -46,6 +46,8 @@ jobs:
 
     steps:
       - uses: actions/download-artifact@v3
+
+      - name: Collect
         run: |
           mkdir out &&
           cp GeoscanDecoder_*-latest/* out/
