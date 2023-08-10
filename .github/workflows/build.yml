@@ -83,7 +83,7 @@ jobs:
       - name: Collect
         run: |
           mkdir out &&
-          cp GeoscanDecoder_*-latest/* out/
+          cp GeoscanDecoder_*/* out/
 
       - name: Update release
         run: gh release upload nightly out/* -R ${{ github.repository }} --clobber
