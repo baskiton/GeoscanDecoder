@@ -29,8 +29,8 @@ class App(ttk.Frame):
         self.master.protocol("WM_DELETE_WINDOW", self.exit)
         self.master.option_add('*tearOff', tk.FALSE)
         self.master.title('Geoscan-Edelveis decoder')
-        self.master.columnconfigure(0, weight=1)
-        self.master.rowconfigure(0, weight=1)
+        # self.master.columnconfigure(0, weight=1)
+        # self.master.rowconfigure(0, weight=1)
 
         self.grid(column=0, row=0, sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
@@ -40,37 +40,23 @@ class App(ttk.Frame):
         self.master.bind('<Control-q>', self.exit)
         self.master.bind('<F1>', self.about)
 
-        # tlm frame
-        self.tlm_frame = ttk.Frame(self, padding=(3, 3, 3, 3))
-        self.tlm_frame.grid(column=0, row=0, sticky=tk.NSEW)
+        # canvas frame
+        self.canvas_frame = ttk.LabelFrame(self, text='Image', padding=(3, 3, 3, 3))
+        self.canvas_frame.grid(column=0, rowspan=2, row=0, sticky=tk.NSEW, padx=2, pady=2)
+        self.canvas_frame.rowconfigure(0, weight=1)
 
-        self.tlm_table = ttk.Treeview(self.tlm_frame, columns='x val', height=17, selectmode='none', show='tree')
-        self.tlm_table.column('#0', anchor='e')
-        self.tlm_table.column('x', width=0)
+        self.canvas_sz = 420, 420
+        self.canvas = tk.Canvas(self.canvas_frame, width=self.canvas_sz[0], height=self.canvas_sz[1])
+        self.canvas.grid(sticky=tk.NSEW, pady=3)
 
-        self.tlm_table.insert('', 'end', 'time', text='Time')
-        self.tlm_table.insert('', 'end', 'Iab', text='Current total, A')
-        self.tlm_table.insert('', 'end', 'Isp', text='Current SP, A')
-        self.tlm_table.insert('', 'end', 'Uab_per', text='Voltage per battery, V')
-        self.tlm_table.insert('', 'end', 'Uab_sum', text='Voltage total, V')
-        self.tlm_table.insert('', 'end', 'Tx_plus', text='Temperature SP X+, °C')
-        self.tlm_table.insert('', 'end', 'Tx_minus', text='Temperature SP X-, °C')
-        self.tlm_table.insert('', 'end', 'Ty_plus', text='Temperature SP Y+, °C')
-        self.tlm_table.insert('', 'end', 'Ty_minus', text='Temperature SP Y-, °C')
-        self.tlm_table.insert('', 'end', 'Tz_plus', text='Temperature SP Z+, °C')
-        self.tlm_table.insert('', 'end', 'Tz_minus', text='Temperature SP Z-, °C')
-        self.tlm_table.insert('', 'end', 'Tab1', text='Temperature battery 1, °C')
-        self.tlm_table.insert('', 'end', 'Tab2', text='Temperature battery 2, °C')
-        self.tlm_table.insert('', 'end', 'CPU_load', text='CPU load, %')
-        self.tlm_table.insert('', 'end', 'Nres_osc', text='Reloads spacecraft')
-        self.tlm_table.insert('', 'end', 'Nres_CommU', text='Reloads CommU')
-        self.tlm_table.insert('', 'end', 'RSSI', text='RSSI')
-
-        self.tlm_table.grid(column=0, row=0, sticky=tk.NSEW)
+        self.image_name_l = ttk.Label(self.canvas_frame)
+        self.image_name_l.grid(sticky=tk.SW, pady=3)
 
         # ctrl frame
-        self.ctrl_frame = ttk.Frame(self, padding=(3, 3, 3, 3))
-        self.ctrl_frame.grid(column=1, row=0, sticky=tk.NSEW)
+        self.ctrl_frame = ttk.LabelFrame(self, text='Options', padding=(3, 3, 3, 3))
+        self.ctrl_frame.grid(column=1, row=0, sticky=tk.NSEW, padx=2, pady=2)
+        self.ctrl_frame.columnconfigure(1, weight=1)
+        self.ctrl_frame.columnconfigure(4, weight=1)
 
         self.out_dir_v = tk.StringVar(self.ctrl_frame, config.get('main', 'outdir'), 'Out dir')
         self.out_dir_e = ttk.Entry(self.ctrl_frame, textvariable=self.out_dir_v, state=tk.NORMAL)
@@ -96,18 +82,43 @@ class App(ttk.Frame):
         self.merge_mode_v = tk.IntVar(self.ctrl_frame, self.config.getboolean('main', 'merge mode'), 'Merge mode')
         self.merge_mode_ckb = ttk.Checkbutton(self.ctrl_frame, text='Merge mode',
                                               variable=self.merge_mode_v, command=self.set_merge_mode)
-        self.merge_mode_ckb.grid(column=6, row=0, sticky=tk.EW, pady=3)
+        self.merge_mode_ckb.grid(column=2, columnspan=2, row=2, sticky=tk.EW, pady=3)
 
         self.new_btn = ttk.Button(self.ctrl_frame, text='New image', command=self.ir.force_new)
-        self.new_btn.grid(column=6, row=1, sticky=tk.EW, pady=3)
+        self.new_btn.grid(column=4, row=2, sticky=tk.EW, pady=3, padx=3)
 
-        self.image_name_l = ttk.Label(self.ctrl_frame)
-        self.image_name_l.grid(column=0, columnspan=10, row=2, sticky=tk.EW, pady=3)
+        # tlm frame
+        self.tlm_frame = ttk.LabelFrame(self, text='Telemetry', padding=(3, 3, 3, 3))
+        self.tlm_frame.grid(column=1, row=1, sticky=tk.NSEW, padx=2, pady=2)
 
-        self.canvas = tk.Canvas(self.ctrl_frame, width=100, height=100)
-        self.canvas.grid(column=0, columnspan=10, row=3, sticky=tk.NSEW, pady=3)
-        self.canvas_sz = 100, 100
+        self.tlm_table = ttk.Treeview(self.tlm_frame, columns='x val', height=17, selectmode='browse', show='tree')
+        self.tlm_table.column('#0', anchor='e')
+        self.tlm_table.column('x', width=0)
 
+        self.tlm_table.insert('', 'end', 'time', text='Time')
+        self.tlm_table.insert('', 'end', 'Iab', text='Current total, A')
+        self.tlm_table.insert('', 'end', 'Isp', text='Current SP, A')
+        self.tlm_table.insert('', 'end', 'Uab_per', text='Voltage per battery, V')
+        self.tlm_table.insert('', 'end', 'Uab_sum', text='Voltage total, V')
+        self.tlm_table.insert('', 'end', 'Tx_plus', text='Temperature SP X+, °C')
+        self.tlm_table.insert('', 'end', 'Tx_minus', text='Temperature SP X-, °C')
+        self.tlm_table.insert('', 'end', 'Ty_plus', text='Temperature SP Y+, °C')
+        self.tlm_table.insert('', 'end', 'Ty_minus', text='Temperature SP Y-, °C')
+        self.tlm_table.insert('', 'end', 'Tz_plus', text='Temperature SP Z+, °C')
+        self.tlm_table.insert('', 'end', 'Tz_minus', text='Temperature SP Z-, °C')
+        self.tlm_table.insert('', 'end', 'Tab1', text='Temperature battery 1, °C')
+        self.tlm_table.insert('', 'end', 'Tab2', text='Temperature battery 2, °C')
+        self.tlm_table.insert('', 'end', 'CPU_load', text='CPU load, %')
+        self.tlm_table.insert('', 'end', 'Nres_osc', text='Reloads spacecraft')
+        self.tlm_table.insert('', 'end', 'Nres_CommU', text='Reloads CommU')
+        self.tlm_table.insert('', 'end', 'RSSI', text='RSSI')
+
+        self.tlm_table.grid(sticky=tk.NSEW, pady=3)
+
+        self.tlm_name_l = ttk.Label(self.tlm_frame)
+        self.tlm_name_l.grid(sticky=tk.EW, pady=3)
+
+        #####
         self.update()
         self.master.minsize(self.winfo_width(), self.winfo_height())
 
@@ -239,7 +250,7 @@ class App(ttk.Frame):
                     f = self.ir.files.get(self.ir.current_fid)
                     if f:
                         cur_img_name = f.name
-                        self.image_name_l.config(text=cur_img_name)
+                        self.image_name_l.config(text=pathlib.Path(cur_img_name).name)
                 self._fill_canvas(cur_img_name)
 
     def _fill_canvas(self, fname):
