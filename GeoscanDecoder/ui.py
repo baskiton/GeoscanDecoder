@@ -1,6 +1,7 @@
 import datetime as dt
 import pathlib
 import socket as sk
+import sys
 import tkinter as tk
 import webbrowser
 
@@ -244,8 +245,13 @@ class App(ttk.Frame):
                 geo_tlm = tlm.geoscan
                 self._fill_telemetry(geo_tlm)
                 fp = pathlib.Path(self.out_dir_v.get()) / f'GEOSCAN_{dt.datetime.now()}.txt'.replace(' ', '_').replace(':', '-')
+                self.tlm_name_l.config(text=fp.name)
+
                 with fp.open('w') as f:
-                    f.write(data.hex(' '))
+                    if sys.version_info < (3, 8, 0):
+                        f.write(data.hex())
+                    else:
+                        f.write(data.hex(' '))
                     f.write('\n\n')
                     f.write(str(geo_tlm))
 
