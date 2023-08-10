@@ -66,6 +66,7 @@ jobs:
       - name: Build
         run: |
           pyinstaller -y decoder.spec
+          mv dist/GeoscanDecoder.exe dist/GeoscanDecoder_win7.exe
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
