@@ -203,9 +203,10 @@ class App(ttk.Frame):
             self._receive()
 
     def _stop(self):
-        s = self.sk
-        self.sk = 0
-        s.close()
+        if self.sk:
+            s = self.sk
+            self.sk = 0
+            s.close()
 
         self.con_btn.config(text='Connect')
         self.server_e.config(state=tk.NORMAL)
@@ -228,8 +229,12 @@ class App(ttk.Frame):
         while self.sk:
             try:
                 frame = self.sk.recv(65536)
-            except TimeoutError:
+            except (sk.timeout, TimeoutError):
                 continue
+            except Exception as e:
+                messagebox.showerror('Error', message='\n'.join(e.args))
+                self._stop()
+                return
             finally:
                 self.update()
 
