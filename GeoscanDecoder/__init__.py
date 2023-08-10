@@ -1,7 +1,7 @@
 import pathlib
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.12'
 
 HOMEDIR = pathlib.Path('~/GeoscanDecoder').expanduser().absolute()
 CONFIG = HOMEDIR / 'config.ini'
