@@ -20,3 +20,6 @@ and wait for result.
 #### Hotkeys
 * `Ctrl-Q` Quit
 * `F1` Show About window
+
+
+![](doc/Screenshot.jpg)
