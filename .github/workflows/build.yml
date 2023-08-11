@@ -49,7 +49,7 @@ jobs:
           pyinstaller -y decoder.spec
 
       - name: Linux rename
-        if: ${{ matrix.os }} == 'ubuntu-latest'
+        if: runner.os == 'Linux'
         run: mv dist/GeoscanDecoder dist/GeoscanDecoder_linux
 
       - name: Upload artifact
