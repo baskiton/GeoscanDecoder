@@ -12,8 +12,9 @@ import PIL.Image
 import PIL.ImageFile
 import PIL.ImageTk
 
-from GeoscanDecoder import __version__, AGWPE_CON
+from GeoscanDecoder import AGWPE_CON
 from GeoscanDecoder.geoscan import geoscan, GeoscanImageReceiver
+from GeoscanDecoder.version import __version__
 
 
 PIL.ImageFile.LOAD_TRUNCATED_IMAGES = 1

@@ -3,6 +3,7 @@ import configparser
 import sys
 
 from GeoscanDecoder import CONFIG, HOMEDIR, ui
+from GeoscanDecoder.version import __version__
 
 
 if __name__ == '__main__':
@@ -10,7 +11,8 @@ if __name__ == '__main__':
     cp.read_dict({'main': {'ip': '127.0.0.1',
                            'port': '8000',
                            'outdir': str(HOMEDIR),
-                           'merge mode': 'off'}})
+                           'merge mode': 'off'},
+                  'info': {'version': __version__}})
     cp.read(CONFIG)
 
     ap = argparse.ArgumentParser()
