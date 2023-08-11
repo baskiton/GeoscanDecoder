@@ -126,7 +126,7 @@ class GeoscanImageReceiver:
     MARKER_IMG = 0x0001
     CMD_IMG_START = 0x0901
     CMD_IMG_FRAME = 0x0905
-    BASE_OFFSET = 4     # old 16384  # old 32768
+    BASE_OFFSET = 0     # old 4     # old 16384     # old 32768
 
     def __init__(self, outdir):
         self.outdir = pathlib.Path(outdir).expanduser().absolute()
@@ -134,8 +134,8 @@ class GeoscanImageReceiver:
         self.files = {}
         self.merge_mode = 0
         self.base_offset = self.BASE_OFFSET
+        self.has_starter = self.has_soi = 0
         self.current_fid = None
-        self._last_data_hash = None
         self._prev_data_sz = -1
         self._miss_cnt = 0
 
@@ -152,11 +152,11 @@ class GeoscanImageReceiver:
         return self.current_fid
 
     def force_new(self):
+        self.has_starter = self.has_soi = self.current_fid = 0
         self.new_file(self.generate_fid())
 
     def new_file(self, fid):
         fn = self.outdir / (fid + '.jpg')
-        print('new file:', fn)
         f = open(fn, 'wb')
         self.files[fid] = f
         return f
@@ -166,7 +166,8 @@ class GeoscanImageReceiver:
         if not data:
             return
 
-        fid = self.file_id(data)
+        # fid = self.file_id(data)
+        fid = self.current_fid or self.generate_fid()
         if not fid:
             fid = self.current_fid
 
@@ -184,6 +185,7 @@ class GeoscanImageReceiver:
             f.close()
             self.current_fid = None
             self.base_offset = self.BASE_OFFSET
+            self.has_starter = self.has_soi = 0
             return 2
 
         return 1
@@ -199,28 +201,32 @@ class GeoscanImageReceiver:
             return
 
         if data.mtype == self.CMD_IMG_START:
+            if data.data.startswith(b'\xff\xd8'):
+                self.has_soi = data.offset
+            self.has_starter = 1
             self.base_offset = data.offset
             data.offset = 0
+            self.generate_fid()
 
         elif data.mtype == self.CMD_IMG_FRAME:
-            data.offset -= self.base_offset
+            if (not self.has_starter
+                    and not self.has_soi
+                    and data.data.startswith(b'\xff\xd8')):
+                self.base_offset = data.offset
+                self.has_soi = data.offset
+                self.generate_fid()
+
+            x = data.offset - self.base_offset
+            if x < 0:
+                self.force_new()
+                self.base_offset = self.BASE_OFFSET
+                x = data.offset - self.base_offset
+            data.offset = x
 
         else:
             return
 
         return data
-
-    def file_id(self, data):
-        ch_hash = hash(data.data)
-        if (data.offset == 0
-                and data.data.startswith(b'\xff\xd8')
-                and ch_hash != self._last_data_hash):
-            # new image
-            self.generate_fid()
-
-        self._last_data_hash = ch_hash
-
-        return self.current_fid or self.generate_fid()
 
     def is_last_data(self, data):
         prev_sz = self._prev_data_sz

@@ -44,14 +44,28 @@ class App(ttk.Frame):
         # canvas frame
         self.canvas_frame = ttk.LabelFrame(self, text='Image', padding=(3, 3, 3, 3))
         self.canvas_frame.grid(column=0, rowspan=2, row=0, sticky=tk.NSEW, padx=2, pady=2)
-        self.canvas_frame.rowconfigure(0, weight=1)
+        self.canvas_frame.rowconfigure(1, weight=1)
+
+        self.image_starter = ttk.Label(self.canvas_frame, text='STARTER', foreground='red')
+        self.image_starter.grid(column=0, row=0, sticky=tk.E, padx=0)
+
+        self.image_soi = ttk.Label(self.canvas_frame, text='SOI', foreground='red')
+        self.image_soi.grid(column=1, row=0, sticky=tk.E, padx=0)
+
+        self.image_offset_l = ttk.Label(self.canvas_frame, text='Base offset:')
+        self.image_offset_l.grid(column=2, row=0, sticky=tk.E, padx=0)
+
+        self.image_offset_v = tk.IntVar(self.canvas_frame, self.ir.BASE_OFFSET)
+        self.image_offset = ttk.Entry(self.canvas_frame, textvariable=self.image_offset_v, width=7,
+                                      validate='all', validatecommand=lambda: False)
+        self.image_offset.grid(column=3, row=0, sticky=tk.W, padx=0)
 
         self.canvas_sz = 420, 420
         self.canvas = tk.Canvas(self.canvas_frame, width=self.canvas_sz[0], height=self.canvas_sz[1])
-        self.canvas.grid(sticky=tk.NSEW, pady=3)
+        self.canvas.grid(columnspan=4, sticky=tk.NSEW, pady=3)
 
         self.image_name_l = ttk.Label(self.canvas_frame)
-        self.image_name_l.grid(sticky=tk.SW, pady=3)
+        self.image_name_l.grid(columnspan=4, sticky=tk.SW, pady=3)
 
         # ctrl frame
         self.ctrl_frame = ttk.LabelFrame(self, text='Options', padding=(3, 3, 3, 3))
@@ -85,7 +99,7 @@ class App(ttk.Frame):
                                               variable=self.merge_mode_v, command=self.set_merge_mode)
         self.merge_mode_ckb.grid(column=2, columnspan=2, row=2, sticky=tk.EW, pady=3)
 
-        self.new_btn = ttk.Button(self.ctrl_frame, text='New image', command=self.ir.force_new)
+        self.new_btn = ttk.Button(self.ctrl_frame, text='New image', command=self.new_img)
         self.new_btn.grid(column=4, row=2, sticky=tk.EW, pady=3, padx=3)
 
         # tlm frame
@@ -185,11 +199,10 @@ class App(ttk.Frame):
             self.sk.send(AGWPE_CON)
 
         except (ConnectionError, OSError) as e:
-            messagebox.showerror('Error', message=e.strerror)
+            messagebox.showerror(message=e.strerror)
 
         except Exception as e:
-            messagebox.showerror('Error', message='\n'.join(e.args))
-            raise
+            messagebox.showerror(message=str(e.args))
 
         else:
             self.con_btn.config(text='Disconnect')
@@ -201,7 +214,11 @@ class App(ttk.Frame):
 
             self.ir.set_outdir(self.out_dir_v.get())
             self.ir.set_merge_mode(self.merge_mode_v.get())
-            self._receive()
+            try:
+                self._receive()
+            except Exception as e:
+                messagebox.showerror(message=str(e.args))
+                self._stop()
 
     def _stop(self):
         if self.sk:
@@ -229,15 +246,16 @@ class App(ttk.Frame):
 
         while self.sk:
             try:
-                frame = self.sk.recv(65536)
+                frame = self.sk.recv(4096)
             except (sk.timeout, TimeoutError):
                 continue
-            except Exception as e:
-                messagebox.showerror('Error', message='\n'.join(e.args))
-                self._stop()
-                return
             finally:
                 self.update()
+
+            if not frame:
+                messagebox.showwarning(message='Connection lost')
+                self._stop()
+                return
 
             data = frame[37:]
             tlm = geoscan.parse(data)
@@ -265,6 +283,9 @@ class App(ttk.Frame):
                 self._fill_canvas(cur_img_name)
 
     def _fill_canvas(self, fname):
+        self.image_starter.config(foreground=self.ir.has_starter and 'green' or 'red')
+        self.image_soi.config(foreground=self.ir.has_soi and 'green' or 'red')
+        self.image_offset_v.set(self.ir.base_offset)
         i = None
         try:
             i = PIL.Image.open(fname)
@@ -301,3 +322,12 @@ class App(ttk.Frame):
         self.tlm_table.set('Nres_osc', 'val', tlm.Nres_osc)
         self.tlm_table.set('Nres_CommU', 'val', tlm.Nres_CommU)
         self.tlm_table.set('RSSI', 'val', tlm.RSSI)
+
+    def new_img(self):
+        self.canvas.delete(tk.ALL)
+        self.ir.force_new()
+        self.image_name_l.config(text=pathlib.Path(self.ir.files.get(self.ir.current_fid).name).name)
+
+        self.image_starter.config(foreground='red')
+        self.image_soi.config(foreground='red')
+        self.image_offset_v.set(self.ir.BASE_OFFSET)
