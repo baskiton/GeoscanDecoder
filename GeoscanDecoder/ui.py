@@ -153,7 +153,7 @@ class App(ttk.Frame):
         about = tk.Toplevel(self)
         about.title('About')
 
-        frame = ttk.Frame(about, padding=(3, 3, 3, 3))
+        frame = ttk.Frame(about, padding=(10, 6, 10, 6))
         frame.grid(column=0, row=0, sticky=tk.NSEW)
 
         ttk.Label(frame, text=f'GeoscanDecoder v{__version__}').grid(columnspan=2)
@@ -177,6 +177,7 @@ class App(ttk.Frame):
         x.bind('<Button-1>', lambda e: webbrowser.open(link))
         x.grid(column=1, row=6, sticky=tk.W)
 
+        ttk.Label(frame).grid(sticky=tk.EW)
         ttk.Button(frame, text='Ok', command=lambda: (about.grab_release(), about.destroy())).grid(columnspan=2)
 
         about.transient(self)
