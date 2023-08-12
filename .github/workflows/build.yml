@@ -100,4 +100,6 @@ jobs:
           cp GeoscanDecoder_*/* out/
 
       - name: Update release
-        run: gh release upload nightly out/* -R ${{ github.repository }} --clobber
+        run: |
+          gh release delete nightly -R ${{ github.repository }} --cleanup-tag -y
+          gh release create nightly -t nightly --generate-notes --prerelease out/*
