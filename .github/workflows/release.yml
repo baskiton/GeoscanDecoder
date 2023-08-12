@@ -23,7 +23,7 @@ jobs:
 
       - name: Build
         run: |
-          V=v$(bash semver.sh)
+          V=$(bash semver.sh)
           mkdir out
           gh release download nightly --clobber -D out
-          gh release create $V -t "GeoscanDecoder $V" --latest --generate-notes out/*
+          gh release create $V -t "GeoscanDecoder v$V" --latest --generate-notes out/*
