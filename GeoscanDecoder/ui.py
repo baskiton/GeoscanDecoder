@@ -1,4 +1,3 @@
-import datetime as dt
 import pathlib
 import socket as sk
 import sys
@@ -313,7 +312,7 @@ class App(ttk.Frame):
             if tlm.geoscan:
                 geo_tlm = tlm.geoscan
                 self._fill_telemetry(geo_tlm)
-                fp = pathlib.Path(self.out_dir_v.get()) / f'GEOSCAN_{dt.datetime.now()}.txt'.replace(' ', '_').replace(':', '-')
+                fp = pathlib.Path(self.out_dir_v.get()) / f'GEOSCAN_{geo_tlm.time}.txt'.replace(' ', '_').replace(':', '-')
                 self.tlm_name_l.config(text=fp.name)
 
                 with fp.open('w') as f:
