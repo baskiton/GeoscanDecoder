@@ -159,25 +159,30 @@ class App(ttk.Frame):
         ttk.Label(frame, text=f'GeoscanDecoder v{__version__}').grid(columnspan=2)
         ttk.Label(frame, text='MIT License\nCopyright (c) 2023 Alexander Baskikh\n', justify='center').grid(columnspan=2, rowspan=3)
 
-        ttk.Label(frame, text='GitHub page:').grid(column=0, row=4, sticky=tk.E)
-        link = 'https://github.com/baskiton/GeoscanDecoder'
-        x = ttk.Label(frame, text=link, foreground='blue', cursor='hand2')
-        x.bind('<Button-1>', lambda e: webbrowser.open(link))
+        links = (
+            ('GitHub page:', 'https://github.com/baskiton/GeoscanDecoder'),
+            ('Geoscan page:', 'https://geoscan.space/ru/geoscan-edelveis'),
+            ('Amateurs chat:', 'https://t.me/amateursat'),
+        )
+
+        ttk.Label(frame, text=links[0][0]).grid(column=0, row=4, sticky=tk.E)
+        x = ttk.Label(frame, text=links[0][1], foreground='blue', cursor='hand2')
+        x.bind('<Button-1>', lambda e: webbrowser.open(links[0][1]))
         x.grid(column=1, row=4, sticky=tk.W)
 
-        ttk.Label(frame, text='Geoscan page:').grid(column=0, row=5, sticky=tk.E)
-        link = 'https://geoscan.space/ru/geoscan-edelveis'
-        x = ttk.Label(frame, text=link, foreground='blue', cursor='hand2')
-        x.bind('<Button-1>', lambda e: webbrowser.open(link))
+        ttk.Label(frame, text=links[1][0]).grid(column=0, row=5, sticky=tk.E)
+        x = ttk.Label(frame, text=links[1][1], foreground='blue', cursor='hand2')
+        x.bind('<Button-1>', lambda e: webbrowser.open(links[1][1]))
         x.grid(column=1, row=5, sticky=tk.W)
 
-        ttk.Label(frame, text='Amateurs chat:').grid(column=0, row=6, sticky=tk.E)
-        link = 'https://t.me/amateursat'
-        x = ttk.Label(frame, text=link, foreground='blue', cursor='hand2')
-        x.bind('<Button-1>', lambda e: webbrowser.open(link))
+        ttk.Label(frame, text=links[2][0]).grid(column=0, row=6, sticky=tk.E)
+        x = ttk.Label(frame, text=links[2][1], foreground='blue', cursor='hand2')
+        x.bind('<Button-1>', lambda e: webbrowser.open(links[2][1]))
         x.grid(column=1, row=6, sticky=tk.W)
 
-        ttk.Label(frame).grid(sticky=tk.EW)
+        secret_lbl = ttk.Label(frame, justify='center')
+        secret_lbl.grid(columnspan=2, sticky=tk.NSEW)
+
         ttk.Button(frame, text='Ok', command=lambda: (about.grab_release(), about.destroy())).grid(columnspan=2)
 
         about.transient(self)
