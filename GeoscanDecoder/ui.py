@@ -3,6 +3,7 @@ import pathlib
 import socket as sk
 import sys
 import tkinter as tk
+import queue
 import webbrowser
 
 from tkinter import ttk, filedialog, messagebox
@@ -150,8 +151,42 @@ class App(ttk.Frame):
         self.quit()
 
     def about(self, evt=None):
+        seq = queue.Queue(5)
+        img = None
+
+        def sequence_check(evt=None):
+            nonlocal seq, img
+
+            if not evt.char:
+                return
+
+            if seq.full():
+                seq.get()
+            seq.put(evt.char.lower())
+
+            if ''.join(seq.queue) == '\x72\x73\x32\x30\x73':
+                import base64
+                import io
+                import urllib.request
+
+                u = base64.b64decode('aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9u'
+                                     'cy90aHVtYi80LzRhL0N1YmVTYXRfR2Vvc2Nhbi1FZGVsdmVpc19lbWJsZW0u'
+                                     'anBnLyVzcHgtQ3ViZVNhdF9HZW9zY2FuLUVkZWx2ZWlzX2VtYmxlbS5qcGc=').decode()
+                raw_pic = urllib.request.urlopen(u % (pad_frame.winfo_width() - 2)).read()
+                img = PIL.ImageTk.PhotoImage(PIL.Image.open(io.BytesIO(raw_pic)))
+
+                for i in pad_frame.winfo_children():
+                    i.destroy()
+                ttk.Label(pad_frame, image=img, justify='center').grid()
+
+                about.update()
+                w, h = frame.winfo_width(), frame.winfo_height()
+                about.minsize(w, h)
+                about.maxsize(w, h)
+
         about = tk.Toplevel(self)
         about.title('About')
+        about.bind('<KeyPress>', sequence_check)
 
         frame = ttk.Frame(about, padding=(10, 6, 10, 6))
         frame.grid(column=0, row=0, sticky=tk.NSEW)
@@ -180,18 +215,20 @@ class App(ttk.Frame):
         x.bind('<Button-1>', lambda e: webbrowser.open(links[2][1]))
         x.grid(column=1, row=6, sticky=tk.W)
 
-        secret_lbl = ttk.Label(frame, justify='center')
-        secret_lbl.grid(columnspan=2, sticky=tk.NSEW)
+        about.update()
+        pad_frame = ttk.Frame(frame, height=x.winfo_height(), padding=(0, 6, 0, 6))
+        pad_frame.grid(columnspan=2, sticky=tk.EW)
 
-        ttk.Button(frame, text='Ok', command=lambda: (about.grab_release(), about.destroy())).grid(columnspan=2)
+        ttk.Button(frame, text='73!', command=lambda: (about.grab_release(), about.destroy())).grid(columnspan=2)
 
         about.transient(self)
         about.wait_visibility()
         about.grab_set()
 
         about.update()
-        about.minsize(frame.winfo_width(), frame.winfo_height())
-        about.maxsize(frame.winfo_width(), frame.winfo_height())
+        w, h = frame.winfo_width(), frame.winfo_height()
+        about.minsize(w, h)
+        about.maxsize(w, h)
 
     def con(self):
         self._stop() if self.sk else self._start()
