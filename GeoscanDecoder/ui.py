@@ -2,6 +2,7 @@ import datetime as dt
 import pathlib
 import socket as sk
 import sys
+import threading
 import tkinter as tk
 import queue
 import webbrowser
@@ -155,7 +156,7 @@ class App(ttk.Frame):
         img = None
 
         def sequence_check(evt=None):
-            nonlocal seq, img
+            nonlocal seq
 
             if not evt.char:
                 return
@@ -165,24 +166,30 @@ class App(ttk.Frame):
             seq.put(evt.char.lower())
 
             if ''.join(seq.queue) == '\x72\x73\x32\x30\x73':
-                import base64
-                import io
-                import urllib.request
+                def foo():
+                    nonlocal img
 
-                u = base64.b64decode('aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9u'
-                                     'cy90aHVtYi80LzRhL0N1YmVTYXRfR2Vvc2Nhbi1FZGVsdmVpc19lbWJsZW0u'
-                                     'anBnLyVzcHgtQ3ViZVNhdF9HZW9zY2FuLUVkZWx2ZWlzX2VtYmxlbS5qcGc=').decode()
-                raw_pic = urllib.request.urlopen(u % (pad_frame.winfo_width() - 2)).read()
-                img = PIL.ImageTk.PhotoImage(PIL.Image.open(io.BytesIO(raw_pic)))
+                    import base64
+                    import io
+                    import urllib.request
 
-                for i in pad_frame.winfo_children():
-                    i.destroy()
-                ttk.Label(pad_frame, image=img, justify='center').grid()
+                    u = base64.b64decode('aHR0cHM6Ly91cGxvYWQud2lraW1lZGlhLm9yZy93aWtpcGVkaWEvY29tbW9u'
+                                         'cy90aHVtYi80LzRhL0N1YmVTYXRfR2Vvc2Nhbi1FZGVsdmVpc19lbWJsZW0u'
+                                         'anBnLyVzcHgtQ3ViZVNhdF9HZW9zY2FuLUVkZWx2ZWlzX2VtYmxlbS5qcGc=').decode()
+                    raw_pic = urllib.request.urlopen(u % (pad_frame.winfo_width() - 2)).read()
+                    img = PIL.ImageTk.PhotoImage(PIL.Image.open(io.BytesIO(raw_pic)))
 
-                about.update()
-                w, h = frame.winfo_width(), frame.winfo_height()
-                about.minsize(w, h)
-                about.maxsize(w, h)
+                    for i in pad_frame.winfo_children():
+                        i.destroy()
+                    ok_btn.config(text='73!')
+                    ttk.Label(pad_frame, image=img, justify='center').grid()
+
+                    about.update()
+                    w, h = frame.winfo_width(), frame.winfo_height()
+                    about.minsize(w, h)
+                    about.maxsize(w, h)
+
+                threading.Thread(target=foo).start()
 
         about = tk.Toplevel(self)
         about.title('About')
@@ -219,16 +226,16 @@ class App(ttk.Frame):
         pad_frame = ttk.Frame(frame, height=x.winfo_height(), padding=(0, 6, 0, 6))
         pad_frame.grid(columnspan=2, sticky=tk.EW)
 
-        ttk.Button(frame, text='73!', command=lambda: (about.grab_release(), about.destroy())).grid(columnspan=2)
-
-        about.transient(self)
-        about.wait_visibility()
-        about.grab_set()
+        ok_btn = ttk.Button(frame, text='Ok', command=lambda: (about.grab_release(), about.destroy()))
+        ok_btn.grid(columnspan=2)
 
         about.update()
         w, h = frame.winfo_width(), frame.winfo_height()
         about.minsize(w, h)
         about.maxsize(w, h)
+
+        about.transient(self)
+        about.grab_set()
 
     def con(self):
         self._stop() if self.sk else self._start()
