@@ -293,7 +293,7 @@ class App(ttk.Frame):
         self.ir.set_merge_mode(self.merge_mode_v.get())
 
     def _receive(self):
-        cur_img_name = None
+        cur_if = None
 
         while self.sk:
             try:
@@ -329,24 +329,24 @@ class App(ttk.Frame):
                 if x == 1:
                     f = self.ir.files.get(self.ir.current_fid)
                     if f:
-                        cur_img_name = f.name
-                        self.image_name_l.config(text=pathlib.Path(cur_img_name).name)
-                self._fill_canvas(cur_img_name)
+                        cur_if = f
+                        self.image_name_l.config(text=pathlib.Path(f.name).name)
+                self._fill_canvas(cur_if)
 
-    def _fill_canvas(self, fname):
+    def _fill_canvas(self, f):
         self.image_starter.config(foreground=self.ir.has_starter and 'green' or 'red')
         self.image_soi.config(foreground=self.ir.has_soi and 'green' or 'red')
         self.image_offset_v.set(self.ir.base_offset)
         i = None
         try:
-            i = PIL.Image.open(fname)
-            self.canvas.delete(tk.ALL)
+            i = PIL.Image.open(f)
             if i.size != self.canvas_sz:
                 self.canvas.config(width=i.width, height=i.height)
                 self.canvas_sz = i.size
                 self.canvas.update()
                 self.master.minsize(self.winfo_width(), self.winfo_height())
             self._imgtk = PIL.ImageTk.PhotoImage(i)
+            self.canvas.delete(tk.ALL)
             self.canvas.create_image(0, 0, anchor=tk.NW, image=self._imgtk)
 
         except:

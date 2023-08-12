@@ -157,7 +157,7 @@ class GeoscanImageReceiver:
 
     def new_file(self, fid):
         fn = self.outdir / (fid + '.jpg')
-        f = open(fn, 'wb')
+        f = open(fn, 'w+b')
         self.files[fid] = f
         return f
 
