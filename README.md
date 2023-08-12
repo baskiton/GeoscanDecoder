@@ -2,7 +2,7 @@
 
 Image and Telemetry decoder for Geoscan-Edelveis satellite
 
-First, download, setup and run geoscan sounmodem  
+First, download, setup and run geoscan soundmodem  
 https://r4uab.ru/program/modem/geoscan.zip  
 https://r4uab.ru/settings-soundmodem/  
 
