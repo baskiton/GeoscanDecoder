@@ -99,7 +99,9 @@ jobs:
           mkdir out &&
           cp GeoscanDecoder_*/* out/
 
-      - name: Update release
-        run: |
-          gh release delete nightly -R ${{ github.repository }} --cleanup-tag -y
-          gh release create nightly -R ${{ github.repository }} -t nightly --generate-notes --prerelease out/*
+      - name: Cleanup
+        continue-on-error: true
+        run: gh release delete nightly -R ${{ github.repository }} --cleanup-tag -y
+
+      - name: Create nightly release
+        run: gh release create nightly -R ${{ github.repository }} -t nightly --generate-notes --prerelease out/*
