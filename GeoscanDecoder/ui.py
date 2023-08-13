@@ -31,7 +31,7 @@ class App(ttk.Frame):
 
         self.master.protocol("WM_DELETE_WINDOW", self.exit)
         self.master.option_add('*tearOff', tk.FALSE)
-        self.master.title('Geoscan-Edelveis decoder')
+        self.master.title(f'Geoscan-Edelveis decoder v{__version__}')
         # self.master.columnconfigure(0, weight=1)
         # self.master.rowconfigure(0, weight=1)
 
