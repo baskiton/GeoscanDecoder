@@ -19,7 +19,33 @@ and wait for result.
 
 #### Hotkeys
 * `Ctrl-Q` Quit
-* `F1` Show About window
-
+* `F1` Show About window, check if newer version available
 
 ![](doc/Screenshot.jpg)
+
+
+### Run from source
+Required at least Python 3.7  
+I recommend to use a virtual environment
+
+Install required packages:
+```commandline
+pip install -r requirements.txt
+```
+
+To run:
+```commandline
+python -m GeoscanDecoder --ui
+```
+
+
+### Build from source
+Required at least Python 3.7  
+I recommend to use a virtual environment
+
+```commandline
+pip install -r requirements.txt
+pip install pyinstaller
+pyinstaller -y decoder.spec
+```
+The result build can be found in the `dist` folder
