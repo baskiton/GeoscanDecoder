@@ -139,6 +139,8 @@ class App(ttk.Frame):
         self.update()
         self.master.minsize(self.winfo_width(), self.winfo_height())
 
+        self.is_about_created = False
+
     def exit(self, evt=None):
         if self.sk:
             self._stop()
@@ -150,7 +152,14 @@ class App(ttk.Frame):
 
         self.quit()
 
+    def change_about_status(self, value):
+        self.is_about_created = value
+
     def about(self, evt=None):
+        if self.is_about_created:
+            return
+        self.change_about_status(True)
+
         seq = queue.Queue(5)
         img = None
 
@@ -225,7 +234,7 @@ class App(ttk.Frame):
         pad_frame = ttk.Frame(frame, height=x.winfo_height(), padding=(0, 6, 0, 6))
         pad_frame.grid(columnspan=2, sticky=tk.EW)
 
-        ok_btn = ttk.Button(frame, text='Ok', command=lambda: (about.grab_release(), about.destroy()))
+        ok_btn = ttk.Button(frame, text='Ok', command=lambda: (about.grab_release(), about.destroy(), self.change_about_status(False)))
         ok_btn.grid(columnspan=2)
 
         about.update()
