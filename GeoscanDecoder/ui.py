@@ -234,6 +234,7 @@ class App(ttk.Frame):
         about.maxsize(w, h)
 
         about.transient(self)
+        about.focus_set()
         about.grab_set()
 
     def con(self):
