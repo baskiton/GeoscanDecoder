@@ -1,8 +1,13 @@
+import json
 import pathlib
+import re
 import socket as sk
 import sys
 import threading
 import tkinter as tk
+import urllib
+import urllib.error
+import urllib.request
 import queue
 import webbrowser
 
@@ -184,13 +189,11 @@ class App(ttk.Frame):
                     ttk.Label(pad_frame, image=img, justify='center').grid()
 
                     about.update()
-                    w, h = frame.winfo_width(), frame.winfo_height()
-                    about.minsize(w, h)
-                    about.maxsize(w, h)
 
                 threading.Thread(target=foo).start()
 
         about = tk.Toplevel(self)
+        about.resizable(width=False, height=False)
         about.title('About')
         about.bind('<KeyPress>', sequence_check)
 
@@ -225,17 +228,55 @@ class App(ttk.Frame):
         pad_frame = ttk.Frame(frame, height=x.winfo_height(), padding=(0, 6, 0, 6))
         pad_frame.grid(columnspan=2, sticky=tk.EW)
 
-        ok_btn = ttk.Button(frame, text='Ok', command=lambda: (about.grab_release(), about.destroy()))
-        ok_btn.grid(columnspan=2)
+        btns_frame = ttk.Frame(frame)
+        btns_frame.grid(columnspan=2, sticky=tk.EW)
+        btns_frame.columnconfigure((0, 1), weight=1)
+
+        upd_btn = ttk.Button(btns_frame, text='Check updates',
+                             command=lambda: threading.Thread(target=self.check_updates, args=(about, btns_frame,)).start())
+        upd_btn.grid(column=0, row=0)
+
+        ok_btn = ttk.Button(btns_frame, text='Ok', command=lambda: (about.grab_release(), about.destroy()))
+        ok_btn.grid(column=1, row=0)
 
         about.update()
-        w, h = frame.winfo_width(), frame.winfo_height()
-        about.minsize(w, h)
-        about.maxsize(w, h)
-
         about.transient(self)
         about.focus_set()
         about.grab_set()
+
+    @staticmethod
+    def check_updates(about, btns_frame):
+        m = re.match(r'([\d.]+).*', __version__)
+        if m:
+            v = tuple(map(int, m.group(1).split('.')))
+        else:
+            messagebox.showerror(message=f'Invalid version, can\'t be compared: {__version__}')
+            return
+
+        try:
+            with urllib.request.urlopen(urllib.request.Request(
+                    'https://api.github.com/repos/baskiton/GeoscanDecoder/releases/latest',
+                    headers={'accept': 'application/vnd.github+json'})) as r:
+                resp = json.load(r)
+        except urllib.error.URLError as e:
+            messagebox.showerror(message=str(e))
+            return
+
+        if v < tuple(map(int, resp['tag_name'].split('.'))):
+            fg = 'green'
+            msg = resp['tag_name']
+        else:
+            fg = 'red'
+            msg = 'not found'
+
+        for i in btns_frame.winfo_children():
+            if isinstance(i, ttk.Label):
+                i.config(text=f'New version: {msg}', foreground=fg)
+                break
+        else:
+            ttk.Label(btns_frame, text=f'New version: {msg}', foreground=fg, justify='center').grid(columnspan=2)
+
+        about.update()
 
     def con(self):
         self._stop() if self.sk else self._start()
