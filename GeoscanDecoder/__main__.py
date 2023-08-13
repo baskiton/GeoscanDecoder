@@ -20,7 +20,7 @@ if __name__ == '__main__':
     ap.add_argument('--server', default=cp.get('main', 'ip'), help='Soundmodem connection IP')
     ap.add_argument('--port', default=cp.get('main', 'port'), help='Soundmodem connection port')
     ap.add_argument('--outdir', default=cp.get('main', 'outdir'), help='Directory to store received data')
-    ap.add_argument('--merge', default=cp.get('main', 'merge mode'), help='Directory to store received data')
+    ap.add_argument('--merge', default=cp.get('main', 'merge mode'), help='Store all new images data to one file')
     ap.add_argument('--ui', help='Run in GUI', action='store_true')
 
     args = ap.parse_args()

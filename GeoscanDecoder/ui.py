@@ -113,8 +113,8 @@ class App(ttk.Frame):
         self.tlm_table.column('x', width=0)
 
         self.tlm_table.insert('', 'end', 'time', text='Time')
-        self.tlm_table.insert('', 'end', 'Iab', text='Current total, A')
-        self.tlm_table.insert('', 'end', 'Isp', text='Current SP, A')
+        self.tlm_table.insert('', 'end', 'Iab', text='Current total, mA')
+        self.tlm_table.insert('', 'end', 'Isp', text='Current SP, mA')
         self.tlm_table.insert('', 'end', 'Uab_per', text='Voltage per battery, V')
         self.tlm_table.insert('', 'end', 'Uab_sum', text='Voltage total, V')
         self.tlm_table.insert('', 'end', 'Tx_plus', text='Temperature SP X+, °C')
@@ -128,7 +128,7 @@ class App(ttk.Frame):
         self.tlm_table.insert('', 'end', 'CPU_load', text='CPU load, %')
         self.tlm_table.insert('', 'end', 'Nres_osc', text='Reloads spacecraft')
         self.tlm_table.insert('', 'end', 'Nres_CommU', text='Reloads CommU')
-        self.tlm_table.insert('', 'end', 'RSSI', text='RSSI')
+        self.tlm_table.insert('', 'end', 'RSSI', text='RSSI, dBm')
 
         self.tlm_table.grid(sticky=tk.NSEW, pady=3)
 
@@ -234,6 +234,7 @@ class App(ttk.Frame):
         about.maxsize(w, h)
 
         about.transient(self)
+        about.focus_set()
         about.grab_set()
 
     def con(self):
