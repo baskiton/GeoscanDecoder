@@ -34,6 +34,9 @@ if __name__ == '__main__':
     if args.ui or frozen:
         app = ui.App(cp)
         app.mainloop()
+    else:
+        print('Console version not supported yet', file=sys.stderr)
+        sys.exit(-1)
 
     with CONFIG.open('w') as cf:
         cp.write(cf)
