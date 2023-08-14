@@ -193,6 +193,9 @@ class App(ttk.Frame):
                 threading.Thread(target=foo).start()
 
         about = tk.Toplevel(self)
+        about.transient(self)
+        about.focus_set()
+        about.grab_set()
         about.resizable(width=False, height=False)
         about.title('About')
         about.bind('<KeyPress>', sequence_check)
@@ -240,9 +243,6 @@ class App(ttk.Frame):
         ok_btn.grid(column=1, row=0)
 
         about.update()
-        about.transient(self)
-        about.focus_set()
-        about.grab_set()
 
     @staticmethod
     def check_updates(about, btns_frame):
