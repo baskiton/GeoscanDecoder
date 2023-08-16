@@ -153,6 +153,9 @@ class GeoscanImageReceiver:
         return self.current_fid
 
     def force_new(self):
+        f = self.files.get(self.current_fid)
+        if f:
+            f.close()
         self.has_starter = self.has_soi = self.current_fid = 0
         self.new_file(self.generate_fid())
 
